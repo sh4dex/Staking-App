@@ -2,12 +2,16 @@
 
 pragma solidity 0.8.34;
 
-contract StakingApp{
+import {Ownable} from "../lib/openzeppelin-contracts/contracts/access/Ownable.sol";
+
+contract StakingApp is Ownable{
 
     address public stakingToken;
 
-    constructor(address stakingToken_, address admin_){
-        //admin = admin_; TODO: use OpenZeppelin
+    /** 
+     * @dev using Access Control from Open Zeppelin
+    */
+    constructor(address stakingToken_, address owner_) Ownable(owner_){
         stakingToken = stakingToken_;
     } 
 
