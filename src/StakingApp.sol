@@ -7,6 +7,9 @@ import {Ownable} from "../lib/openzeppelin-contracts/contracts/access/Ownable.so
 contract StakingApp is Ownable{
 
     address public stakingToken;
+    uint256 public stakingPeriod;
+
+    event newStakingPeriod(uint256 newStakingPeriod_, address modifier_);
 
     /** 
      * @dev using Access Control from Open Zeppelin
@@ -15,4 +18,11 @@ contract StakingApp is Ownable{
         stakingToken = stakingToken_;
     } 
 
+
+    //TODO: Deposit-Withdraw-Claim
+
+    function setNewStakingPeriod(uint256 stakingPeriod_) external onlyOwner {
+        stakingPeriod = stakingPeriod_;
+        emit newStakingPeriod(stakingPeriod_, msg.sender);
+    }
 }
