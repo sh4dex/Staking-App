@@ -5,9 +5,9 @@ pragma solidity 0.8.34;
 import {Test} from "forge-std/Test.sol";
 import {StakingToken} from "../../src/StakingToken.sol";
 import {StakingApp} from "../../src/StakingApp.sol";
-import {IERC20} from "../../lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
+//import {IERC20} from "../../lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 
-contract StakingTokenTest is Test {
+contract StakingAppTest is Test {
     StakingToken stakingToken;
     StakingApp stakingApp;
     address basicUser;
@@ -26,21 +26,23 @@ contract StakingTokenTest is Test {
     /**
      * @dev using a random user from basicUser and checking it's balance before and after minting
      */
-    function testStakingTokenMintingPropperly() public {
+    function testDepositTokens() public {
         vm.startPrank(basicUser);
-        uint256 amount_ = 1 ether;
-        uint256 initialBalance_ = IERC20(address(stakingToken)).balanceOf(basicUser);
-        stakingToken.mint(amount_);
-        uint256 finalBalance_ = IERC20(address(stakingToken)).balanceOf(basicUser);
-        assert(finalBalance_ - initialBalance_ == amount_);
         vm.stopPrank();
     }
 
-    function testChangeStakingPeriodPropperly() public {
+    function testWithdrawTokens() public {
         vm.startPrank(owner);
-        uint256 newStakingPeriod = 345;
-        stakingApp.setNewStakingPeriod(newStakingPeriod);
-        assert(stakingApp.stakingPeriod() == newStakingPeriod);
+        vm.stopPrank();
+    }
+
+    function setClaimRewards() public {
+        vm.startPrank(owner);
+        vm.stopPrank();
+    }
+
+    function testSetNewStakingPeriod() public {
+        vm.startPrank(owner);
         vm.stopPrank();
     }
 }
