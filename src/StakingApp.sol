@@ -10,8 +10,8 @@ contract StakingApp is Ownable {
     uint256 public stakingPeriod;
     uint256 public fixedDepositAmount;
     uint256 public rewardAmountPerPeriod;
-    mapping(address => uint256) userBalances;
-    mapping(address => uint256) depositStamp;
+    mapping(address => uint256) public userBalances;
+    mapping(address => uint256) public depositStamp;
 
     event NewStakingPeriod(uint256 newStakingPeriod_, address modifier_);
     event DepositMade(uint256 tokenDepositAmount_, address depositer_);

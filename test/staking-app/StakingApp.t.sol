@@ -5,6 +5,7 @@ pragma solidity 0.8.34;
 import {Test} from "forge-std/Test.sol";
 import {StakingToken} from "../../src/StakingToken.sol";
 import {StakingApp} from "../../src/StakingApp.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract StakingAppTest is Test {
     StakingToken stakingToken;
@@ -73,12 +74,38 @@ contract StakingAppTest is Test {
         vm.stopPrank();
     }
 
-    //TODO: Finish tests
+    //Tests Deposit
+
     /**
-     * @dev using a random user from basicUser and checking it's balance before and after minting
+     * @dev using a random user from basicUser and checking it's balance before and after minting    
      */
-    function testDeposit () external {
+    function testDepositIncorrectAmountShouldRevert() external {
         vm.startPrank(basicUser);
+        uint256 diffAmount = 20;
+        vm.expectRevert("Can only deposit fixed amount");
+        stakingApp.depositTokens(diffAmount);
+        vm.stopPrank();
+    }
+
+    /**
+     * @dev using a random user from basicUser and checking it's balance before and after minting    
+     */
+    function testDepositPropperAmount() external {
+        vm.startPrank(basicUser);
+        uint256 amount_ = stakingApp.fixedDepositAmount();
+        stakingToken.mint(amount_);
+
+        uint256 initialElapse = stakingApp.depositStamp(basicUser);
+        uint256 initialBalance = stakingApp.userBalances(basicUser);
+        IERC20(stakingToken).approve(address(stakingApp), amount_);
+        stakingApp.depositTokens(amount_);
+        uint256 finalBalance = stakingApp.userBalances(basicUser);
+        uint256 finalElapse = stakingApp.depositStamp(basicUser);
+
+
+        assert(finalBalance - initialBalance == amount_);
+        assert(initialElapse == 0);
+        assert(finalElapse == block.timestamp);
         vm.stopPrank();
     }
 
