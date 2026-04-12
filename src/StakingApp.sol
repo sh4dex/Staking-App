@@ -6,7 +6,6 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract StakingApp is Ownable {
-    
     address public stakingToken;
     uint256 public stakingPeriod;
     uint256 public fixedDepositAmount;
@@ -22,9 +21,13 @@ contract StakingApp is Ownable {
     /**
      * @dev using Access Control from Open Zeppelin
      */
-    constructor(address stakingToken_, address owner_, uint256 stakingPeriod_, uint256 fixedDepositAmount_, uint256 rewardAmountPerPeriod_)
-        Ownable(owner_)
-    {
+    constructor(
+        address stakingToken_,
+        address owner_,
+        uint256 stakingPeriod_,
+        uint256 fixedDepositAmount_,
+        uint256 rewardAmountPerPeriod_
+    ) Ownable(owner_) {
         stakingToken = stakingToken_;
         stakingPeriod = stakingPeriod_;
         fixedDepositAmount = fixedDepositAmount_;
@@ -32,9 +35,9 @@ contract StakingApp is Ownable {
     }
 
     /**
-     * @dev modifies mapping and 
+     * @dev modifies mapping and
      * @param tokenDepositAmount_  tokenDepositAmount Amount of tokens
-     * 
+     *
      * emit {DepositMade}
      */
     function depositTokens(uint256 tokenDepositAmount_) external {
@@ -48,31 +51,30 @@ contract StakingApp is Ownable {
     }
 
     /**
-     * @dev 
+     * @dev
      */
     function withdrawTokens() external {
         uint256 balanceToTranfer_ = userBalances[msg.sender];
         require(balanceToTranfer_ == fixedDepositAmount, "Not enought tokes to withdraw");
         userBalances[msg.sender] = 0;
         bool success = IERC20(stakingToken).transfer(msg.sender, balanceToTranfer_);
-        require (success, "transfer failed");
+        require(success, "transfer failed");
         emit WithdrawnTokens(balanceToTranfer_, msg.sender);
     }
 
     /**
-     * 
+     *
      */
     function claimRewards() external {
         require(userBalances[msg.sender] == fixedDepositAmount, "Not staking");
 
-        uint256 elapsePeriod_= block.timestamp - depositStamp[msg.sender];
+        uint256 elapsePeriod_ = block.timestamp - depositStamp[msg.sender];
         require(elapsePeriod_ >= stakingPeriod, "not claim available yet.");
         depositStamp[msg.sender] = block.timestamp;
         (bool success,) = msg.sender.call{value: rewardAmountPerPeriod}("");
-        require (success, "transfer failed");
+        require(success, "transfer failed");
         emit WithdrawnTokens(rewardAmountPerPeriod, msg.sender);
     }
-
 
     /**
      * @dev If the owner do not send ether, then the ether is gonna be out
@@ -82,7 +84,7 @@ contract StakingApp is Ownable {
     }
 
     /**
-     * 
+     *
      * @param stakingPeriod_  New staking perido
      */
     function setNewStakingPeriod(uint256 stakingPeriod_) external onlyOwner {
