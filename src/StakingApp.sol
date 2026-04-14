@@ -43,9 +43,9 @@ contract StakingApp is Ownable {
     function depositTokens(uint256 tokenDepositAmount_) external {
         require(tokenDepositAmount_ == fixedDepositAmount, "Can only deposit fixed amount");
         require(userBalances[msg.sender] == 0, "Already deposited");
-        userBalances[msg.sender] += tokenDepositAmount_;
         bool done = IERC20(stakingToken).transferFrom(msg.sender, address(this), tokenDepositAmount_);
         require(done, "tranfer failed");
+        userBalances[msg.sender] += tokenDepositAmount_;
         depositStamp[msg.sender] = block.timestamp;
         emit DepositMade(tokenDepositAmount_, msg.sender);
     }
@@ -55,10 +55,10 @@ contract StakingApp is Ownable {
      */
     function withdrawTokens() external {
         uint256 balanceToTranfer_ = userBalances[msg.sender];
-        require(balanceToTranfer_ == fixedDepositAmount, "Not enought tokes to withdraw");
-        userBalances[msg.sender] = 0;
+        require(balanceToTranfer_ == fixedDepositAmount, "Not enought tokens to withdraw");
         bool success = IERC20(stakingToken).transfer(msg.sender, balanceToTranfer_);
         require(success, "transfer failed");
+        userBalances[msg.sender] = 0;
         emit WithdrawnTokens(balanceToTranfer_, msg.sender);
     }
 
@@ -69,7 +69,7 @@ contract StakingApp is Ownable {
         require(userBalances[msg.sender] == fixedDepositAmount, "Not staking");
 
         uint256 elapsePeriod_ = block.timestamp - depositStamp[msg.sender];
-        require(elapsePeriod_ >= stakingPeriod, "not claim available yet.");
+        require(elapsePeriod_ >= stakingPeriod, "no claim available yet");
         depositStamp[msg.sender] = block.timestamp;
         (bool success,) = msg.sender.call{value: rewardAmountPerPeriod}("");
         require(success, "transfer failed");
