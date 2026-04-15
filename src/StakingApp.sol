@@ -35,9 +35,9 @@ contract StakingApp is Ownable {
     }
 
     /**
-     * @dev modifies mapping and
+     * @dev Updates mapping and contract gets tokens using {transferFrom}
+     * from msg.sender to this smart contract
      * @param tokenDepositAmount_  tokenDepositAmount Amount of tokens
-     *
      * emit {DepositMade}
      */
     function depositTokens(uint256 tokenDepositAmount_) external {
@@ -51,23 +51,24 @@ contract StakingApp is Ownable {
     }
 
     /**
-     * @dev
+     * @notice User can only Withdraw the staked amount (deposited amount)
      */
     function withdrawTokens() external {
         uint256 balanceToTranfer_ = userBalances[msg.sender];
         require(balanceToTranfer_ == fixedDepositAmount, "Not enought tokens to withdraw");
+        userBalances[msg.sender] = 0;
         bool success = IERC20(stakingToken).transfer(msg.sender, balanceToTranfer_);
         require(success, "transfer failed");
-        userBalances[msg.sender] = 0;
         emit WithdrawnTokens(balanceToTranfer_, msg.sender);
     }
 
     /**
-     *
+     * @dev {depositStamp} refers to the last snapshot where the user has deposit
+     * this means that the time from it to the {block.timestamp} should be greater
+     * than the {stakingPeriod} in order to get rewards
      */
     function claimRewards() external {
         require(userBalances[msg.sender] == fixedDepositAmount, "Not staking");
-
         uint256 elapsePeriod_ = block.timestamp - depositStamp[msg.sender];
         require(elapsePeriod_ >= stakingPeriod, "no claim available yet");
         depositStamp[msg.sender] = block.timestamp;
@@ -84,8 +85,9 @@ contract StakingApp is Ownable {
     }
 
     /**
-     *
-     * @param stakingPeriod_  New staking perido
+     * @notice Only Owner can call this function
+     * @param stakingPeriod_  New staking period
+     * emit {NewStakingPeriod}
      */
     function setNewStakingPeriod(uint256 stakingPeriod_) external onlyOwner {
         stakingPeriod = stakingPeriod_;

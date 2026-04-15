@@ -35,12 +35,4 @@ contract StakingTokenTest is Test {
         assert(finalBalance_ - initialBalance_ == amount_);
         vm.stopPrank();
     }
-
-    function testChangeStakingPeriodPropperly() public {
-        vm.startPrank(owner);
-        uint256 newStakingPeriod = 345;
-        stakingApp.setNewStakingPeriod(newStakingPeriod);
-        assert(stakingApp.stakingPeriod() == newStakingPeriod);
-        vm.stopPrank();
-    }
 }

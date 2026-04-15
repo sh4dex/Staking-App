@@ -25,41 +25,39 @@ contract StakingAppTest is Test {
     }
 
     /**
-     *  Adresss 0 is the default of all smart contracts means it's not ddeployed)
+     *  Adresss 0 is the default of all smart contracts means it's not deployed)
      */
     function testStakingTokenDeployedPropperly() external view {
         assert(address(stakingToken) != address(0));
     }
 
     /**
-     *
+     *  If different from zero means it's propperly deployed
      */
     function testStakingAppDeployedPropperly() external view {
         assert(address(stakingApp) != address(0));
     }
 
+    // *************************
+    // ACCESS CONTROL FUNCTIONS
+    // *************************
     function testShouldRevertIfNotOwner() external {
         uint256 newStakingPeriod = 200;
         vm.expectRevert();
         stakingApp.setNewStakingPeriod(newStakingPeriod);
     }
 
-    function testAdminCanChangeSakingperiod() external {
+    function testSetNewStakingPeriodPropperly() public {
         vm.startPrank(owner);
-        uint256 newStakingPeriod = 1000;
-
-        uint256 oldStakingPeriod = stakingApp.stakingPeriod();
-        stakingApp.setNewStakingPeriod(newStakingPeriod);
-        uint256 actualStakingPeriod = stakingApp.stakingPeriod();
-
-        assert(oldStakingPeriod != actualStakingPeriod);
-        assert(actualStakingPeriod == newStakingPeriod);
+        uint256 newStakingPeriod_ = 10;
+        stakingApp.setNewStakingPeriod(newStakingPeriod_);
+        assert(stakingApp.stakingPeriod() == newStakingPeriod_);
         vm.stopPrank();
     }
 
     /**
      * @dev calling receive function
-     * using vm.deal to add balnce to the owner account
+     * using vm.deal to add balance to the owner account
      */
     function testContractReceiveEtherPropperly() external {
         vm.startPrank(owner);
@@ -74,8 +72,9 @@ contract StakingAppTest is Test {
         vm.stopPrank();
     }
 
-    //Tests Deposit
-
+    // ******************
+    // DEPOSIT FUNCTIONS
+    // ******************
     /**
      * @dev using a random user from basicUser and checking it's balance before and after minting
      */
@@ -109,7 +108,8 @@ contract StakingAppTest is Test {
     }
 
     /**
-     *
+     * @notice This funtion automates the deposit process for the
+     * test that require that the user needs to deposit
      * @param user user address
      * @param amount_  amount to perform deposit
      */
@@ -122,7 +122,7 @@ contract StakingAppTest is Test {
     }
 
     /**
-     * This functions simulates two continuos deposits
+     * This functions simulates two continous deposits
      */
     function testCantDepositTwice() external {
         uint256 amount_ = stakingApp.fixedDepositAmount();
@@ -133,9 +133,10 @@ contract StakingAppTest is Test {
         vm.stopPrank();
     }
 
-    /**
-     *
-     */
+
+    // *******************
+    // WITHDRAW FUNCTIONS
+    // *******************
     function testWithdrawTokensShouldRevertWithoutPropperBalance() public {
         vm.startPrank(owner);
         uint256 _amount = 9;
@@ -151,9 +152,6 @@ contract StakingAppTest is Test {
         vm.stopPrank();
     }
 
-    /**
-     *
-     */
     function testWithdrawWorksPropperly() external {
         _deposit(basicUser, stakingApp.fixedDepositAmount());
         vm.startPrank(basicUser);
@@ -170,6 +168,10 @@ contract StakingAppTest is Test {
         vm.stopPrank();
     }
 
+    // ****************
+    // CLAIM FUNCTIONS
+    // ****************
+
     function testCanNotClainIfNotStaking() external {
         vm.startPrank(basicUser);
         vm.expectRevert("Not staking");
@@ -185,10 +187,8 @@ contract StakingAppTest is Test {
         vm.stopPrank();
     }
 
-    /**
-     *
-     */
-    function testShouldRevertWithoutContractEther() public {
+
+    function testClaimShouldRevertWithoutContractEther() public {
         _deposit(basicUser, stakingApp.fixedDepositAmount());
         vm.warp(stakingPeriod + block.timestamp);
         vm.startPrank(basicUser);
@@ -202,12 +202,11 @@ contract StakingAppTest is Test {
         _deposit(basicUser, stakingApp.fixedDepositAmount());
         vm.warp(stakingPeriod + block.timestamp);
 
-        vm.startPrank(owner);
         uint256 ethAmount = 100 ether;
+        vm.prank(owner);
         vm.deal(owner, ethAmount);
         (bool success,) = address(stakingApp).call{value: ethAmount}("");
         require(success, "test Transfer failed");
-        vm.stopPrank();
 
         vm.startPrank(basicUser);
         uint256 userBalanceBefore = address(basicUser).balance;
@@ -215,25 +214,6 @@ contract StakingAppTest is Test {
         assert(stakingApp.depositStamp(basicUser) == block.timestamp);
         uint256 userBalanceAfter = address(basicUser).balance;
         assert(userBalanceAfter == userBalanceBefore + rewardAmount);
-        vm.stopPrank();
-    }
-
-    /**
-     *
-     */
-    function testSetNewStakingPeriodPropperly() public {
-        vm.startPrank(owner);
-        uint256 newStakingPeriod_ = 10;
-        stakingApp.setNewStakingPeriod(newStakingPeriod_);
-        assert(stakingApp.stakingPeriod() == newStakingPeriod_);
-        vm.stopPrank();
-    }
-
-    function testSetNewStakingPeriodrevertsIfNotOwner() public {
-        vm.startPrank(basicUser);
-        uint256 newStakingPeriod_ = 10;
-        vm.expectRevert();
-        stakingApp.setNewStakingPeriod(newStakingPeriod_);
         vm.stopPrank();
     }
 }
