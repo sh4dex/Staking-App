@@ -5,4 +5,8 @@ libs = ["lib"]
 
 solc_version = "0.8.34"
 
+# Coverage configuration - exclude script and test directories
+[profile.default.coverage]
+exclude = ["script", "test", "lib"]
+
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options

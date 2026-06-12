@@ -133,7 +133,6 @@ contract StakingAppTest is Test {
         vm.stopPrank();
     }
 
-
     // *******************
     // WITHDRAW FUNCTIONS
     // *******************
@@ -186,7 +185,6 @@ contract StakingAppTest is Test {
         stakingApp.claimRewards();
         vm.stopPrank();
     }
-
 
     function testClaimShouldRevertWithoutContractEther() public {
         _deposit(basicUser, stakingApp.fixedDepositAmount());
